@@ -1,0 +1,416 @@
+<!-- This file contains the bot detection signals used by the Adscore bot detection company.  See http://c.adsco.re/d for their code. -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Demonstration</title>
+    </head>
+    <body>
+        <script>
+            function evalCatch(d) {
+                try {
+                    d = eval(d);
+                } catch (f) {
+                    d = "";
+                }
+                return d;
+            }
+
+            function writeScreen(text) {
+                document.body.innerHTML += text;
+                document.body.innerHTML += "<br>";
+            }
+
+            writeScreen(
+                "typeof window.chrome - " + evalCatch("typeof window.chrome"),
+            );
+            writeScreen(
+                "document.location - " + evalCatch("document.location"),
+            );
+            writeScreen("document.hidden - " + evalCatch("document.hidden"));
+            writeScreen(
+                "document.visibilityState - " +
+                    evalCatch("document.visibilityState"),
+            );
+            writeScreen("!(top==window) - " + evalCatch("!(top==window)"));
+            writeScreen(
+                "window.locationbar.visible - " +
+                    evalCatch("window.locationbar.visible"),
+            );
+            writeScreen(
+                "window.menubar.visible - " +
+                    evalCatch("window.menubar.visible"),
+            );
+            writeScreen(
+                "window.personalbar.visible - " +
+                    evalCatch("window.personalbar.visible"),
+            );
+            writeScreen(
+                "window.scrollbars.visible - " +
+                    evalCatch("window.scrollbars.visible"),
+            );
+            writeScreen(
+                "window.statusbar.visible - " +
+                    evalCatch("window.statusbar.visible"),
+            );
+            writeScreen(
+                "window.toolbar.visible - " +
+                    evalCatch("window.toolbar.visible"),
+            );
+            writeScreen(
+                "typeof window.WebAssembly - " +
+                    evalCatch("typeof window.WebAssembly"),
+            );
+            writeScreen(
+                "window.mozPaintCount - " + evalCatch("window.mozPaintCount"),
+            );
+            writeScreen(
+                "top.frames.length - " + evalCatch("top.frames.length"),
+            );
+            writeScreen(
+                "window.history.length - " + evalCatch("window.history.length"),
+            );
+            writeScreen(
+                "!!document.fullscreen||!!document.mozFullscreen||!!document.webkitIsFullScreen||!!document.fullScreenElement - " +
+                    evalCatch(
+                        "!!document.fullscreen||!!document.mozFullscreen||!!document.webkitIsFullScreen||!!document.fullScreenElement",
+                    ),
+            );
+            writeScreen(
+                "window.navigator.standalone - " +
+                    evalCatch("window.navigator.standalone"),
+            );
+            writeScreen(
+                "document.referrer - " + evalCatch("document.referrer"),
+            );
+            writeScreen(
+                "document.innerWidth - " + evalCatch("document.innerWidth"),
+            );
+            writeScreen(
+                "document.innerHeight - " + evalCatch("document.innerHeight"),
+            );
+            writeScreen(
+                "document.documentElement.clientWidth - " +
+                    evalCatch("document.documentElement.clientWidth"),
+            );
+            writeScreen(
+                "document.documentElement.clientHeight - " +
+                    evalCatch("document.documentElement.clientHeight"),
+            );
+            writeScreen(
+                "window.screenX||window.screenLeft - " +
+                    evalCatch("window.screenX||window.screenLeft"),
+            );
+            writeScreen(
+                "window.screenY||window.screenTop - " +
+                    evalCatch("window.screenY||window.screenTop"),
+            );
+            writeScreen(
+                "window.outerWidth - " + evalCatch("window.outerWidth"),
+            );
+            writeScreen(
+                "window.outerHeight - " + evalCatch("window.outerHeight"),
+            );
+            writeScreen(
+                "window.innerWidth - " + evalCatch("window.innerWidth"),
+            );
+            writeScreen(
+                "window.innerHeight - " + evalCatch("window.innerHeight"),
+            );
+            writeScreen(
+                "document.hasFocus() - " + evalCatch("document.hasFocus()"),
+            );
+            writeScreen(
+                "document.hasFocus - " + evalCatch("document.hasFocus"),
+            );
+            writeScreen(
+                "window.offscreenBuffering - " +
+                    evalCatch("window.offscreenBuffering"),
+            );
+            writeScreen(
+                "MouseEvent.WEBKIT_FORCE_AT_MOUSE_DOWN - " +
+                    evalCatch("MouseEvent.WEBKIT_FORCE_AT_MOUSE_DOWN"),
+            );
+            writeScreen(
+                "window.performance.memory.jsHeapSizeLimit - " +
+                    evalCatch("window.performance.memory.jsHeapSizeLimit"),
+            );
+            writeScreen(
+                "screen.orientation.type - " +
+                    evalCatch("screen.orientation.type"),
+            );
+            writeScreen("screen.top - " + evalCatch("screen.top"));
+            writeScreen("screen.left - " + evalCatch("screen.left"));
+            writeScreen("screen.availTop - " + evalCatch("screen.availTop"));
+            writeScreen("screen.availLeft - " + evalCatch("screen.availLeft"));
+            writeScreen("screen.width - " + evalCatch("screen.width"));
+            writeScreen("screen.height - " + evalCatch("screen.height"));
+            writeScreen(
+                "screen.availWidth - " + evalCatch("screen.availWidth"),
+            );
+            writeScreen(
+                "screen.availHeight - " + evalCatch("screen.availHeight"),
+            );
+            writeScreen(
+                "screen.colorDepth - " + evalCatch("screen.colorDepth"),
+            );
+            writeScreen(
+                "screen.pixelDepth - " + evalCatch("screen.pixelDepth"),
+            );
+            writeScreen(
+                "screen.deviceYDPI - " + evalCatch("screen.deviceYDPI"),
+            );
+            writeScreen(
+                "screen.deviceXDPI - " + evalCatch("screen.deviceXDPI"),
+            );
+            writeScreen(
+                "window.devicePixelRatio - " +
+                    evalCatch("window.devicePixelRatio"),
+            );
+            writeScreen(
+                "navigator.userAgent - " + evalCatch("navigator.userAgent"),
+            );
+            writeScreen(
+                "navigator.appVersion - " + evalCatch("navigator.appVersion"),
+            );
+            writeScreen(
+                "navigator.appCodeName - " + evalCatch("navigator.appCodeName"),
+            );
+            writeScreen(
+                "navigator.appMinorVersion - " +
+                    evalCatch("navigator.appMinorVersion"),
+            );
+            writeScreen(
+                "navigator.product - " + evalCatch("navigator.product"),
+            );
+            writeScreen(
+                "navigator.productSub - " + evalCatch("navigator.productSub"),
+            );
+            writeScreen("navigator.vendor - " + evalCatch("navigator.vendor"));
+            writeScreen(
+                "navigator.vendorSub - " + evalCatch("navigator.vendorSub"),
+            );
+            writeScreen(
+                "navigator.buildID - " + evalCatch("navigator.buildID"),
+            );
+            writeScreen(
+                "navigator.platform - " + evalCatch("navigator.platform"),
+            );
+            writeScreen(
+                "navigator.cpuClass - " + evalCatch("navigator.cpuClass"),
+            );
+            writeScreen("navigator.oscpu - " + evalCatch("navigator.oscpu"));
+            writeScreen(
+                "navigator.hardwareConcurrency - " +
+                    evalCatch("navigator.hardwareConcurrency"),
+            );
+            writeScreen(
+                "navigator.maxTouchPoints - " +
+                    evalCatch("navigator.maxTouchPoints"),
+            );
+            writeScreen(
+                "navigator.msMaxTouchPoints - " +
+                    evalCatch("navigator.msMaxTouchPoints"),
+            );
+            writeScreen(
+                "navigator.language - " + evalCatch("navigator.language"),
+            );
+            writeScreen(
+                "navigator.languages.toString() - " +
+                    evalCatch("navigator.languages.toString()"),
+            );
+            writeScreen(
+                "navigator.browserLanguage - " +
+                    evalCatch("navigator.browserLanguage"),
+            );
+            writeScreen(
+                "navigator.userLanguage - " +
+                    evalCatch("navigator.userLanguage"),
+            );
+            writeScreen(
+                "navigator.systemLanguage - " +
+                    evalCatch("navigator.systemLanguage"),
+            );
+            writeScreen("navigator.onLine - " + evalCatch("navigator.onLine"));
+            writeScreen(
+                "navigator.deviceMemory - " +
+                    evalCatch("navigator.deviceMemory"),
+            );
+            writeScreen(
+                "navigator.doNotTrack - " + evalCatch("navigator.doNotTrack"),
+            );
+            writeScreen(
+                "navigator.msDoNotTrack - " +
+                    evalCatch("navigator.msDoNotTrack"),
+            );
+            writeScreen(
+                "navigator.cookieEnabled - " +
+                    evalCatch("navigator.cookieEnabled"),
+            );
+            writeScreen(
+                "navigator.battery.level - " +
+                    evalCatch("navigator.battery.level"),
+            );
+            writeScreen(
+                "navigator.battery.charging - " +
+                    evalCatch("navigator.battery.charging"),
+            );
+            writeScreen(
+                "performance.navigation.type - " +
+                    evalCatch("performance.navigation.type"),
+            );
+            writeScreen(
+                "performance.navigation.redirectCount - " +
+                    evalCatch("performance.navigation.redirectCount"),
+            );
+            writeScreen(
+                "window.opener==null - " + evalCatch("window.opener==null"),
+            );
+            writeScreen(
+                "window.opener.location.href - " +
+                    evalCatch("window.opener.location.href"),
+            );
+            writeScreen(
+                "window.opener.screenX||window.opener.screenLeft - " +
+                    evalCatch(
+                        "window.opener.screenX||window.opener.screenLeft",
+                    ),
+            );
+            writeScreen(
+                "window.opener.screenY||window.opener.screenTop - " +
+                    evalCatch("window.opener.screenY||window.opener.screenTop"),
+            );
+            writeScreen(
+                "window.opener.innerWidth - " +
+                    evalCatch("window.opener.innerWidth"),
+            );
+            writeScreen(
+                "window.opener.innerHeight - " +
+                    evalCatch("window.opener.innerHeight"),
+            );
+            writeScreen(
+                "window.opener.outerWidth - " +
+                    evalCatch("window.opener.outerWidth"),
+            );
+            writeScreen(
+                "window.opener.outerHeight - " +
+                    evalCatch("window.opener.outerHeight"),
+            );
+            writeScreen(
+                "window.opener.offscreenBuffering - " +
+                    evalCatch("window.opener.offscreenBuffering"),
+            );
+            writeScreen(
+                "(new Date).getTimezoneOffset() - " +
+                    evalCatch("(new Date).getTimezoneOffset()"),
+            );
+            writeScreen(
+                "navigator.connection.type - " +
+                    evalCatch("navigator.connection.type"),
+            );
+            writeScreen(
+                "navigator.connection.effectieType - " +
+                    evalCatch("navigator.connection.effectieType"),
+            );
+            writeScreen(
+                "navigator.connection.downlinkMax - " +
+                    evalCatch("navigator.connection.downlinkMax"),
+            );
+            writeScreen(
+                "navigator.connection.downlink - " +
+                    evalCatch("navigator.connection.downlink"),
+            );
+            writeScreen(
+                "navigator.connection.rtt - " +
+                    evalCatch("navigator.connection.rtt"),
+            );
+            writeScreen(
+                "navigator.connection.saveData - " +
+                    evalCatch("navigator.connection.saveData"),
+            );
+            writeScreen(
+                "window.ScriptEngineMajorVersion() - " +
+                    evalCatch("window.ScriptEngineMajorVersion()"),
+            );
+            writeScreen(
+                "window.ScriptEngineMinorVersion() - " +
+                    evalCatch("window.ScriptEngineMinorVersion()"),
+            );
+            writeScreen(
+                "window.ScriptEngineBuildVersion() - " +
+                    evalCatch("window.ScriptEngineBuildVersion()"),
+            );
+            writeScreen(
+                "performance.timing.redirectEnd - " +
+                    evalCatch("performance.timing.redirectEnd"),
+            );
+            writeScreen(
+                "performance.timing.fetchStart - " +
+                    evalCatch("performance.timing.fetchStart"),
+            );
+            writeScreen(
+                "performance.timing.domainLookupStart - " +
+                    evalCatch("performance.timing.domainLookupStart"),
+            );
+            writeScreen(
+                "performance.timing.domainLookupEnd - " +
+                    evalCatch("performance.timing.domainLookupEnd"),
+            );
+            writeScreen(
+                "performance.timing.connectStart - " +
+                    evalCatch("performance.timing.connectStart"),
+            );
+            writeScreen(
+                "performance.timing.connectEnd - " +
+                    evalCatch("performance.timing.connectEnd"),
+            );
+            writeScreen(
+                "performance.timing.secureConnectionStart - " +
+                    evalCatch("performance.timing.secureConnectionStart"),
+            );
+            writeScreen(
+                "performance.timing.requestStart - " +
+                    evalCatch("performance.timing.requestStart"),
+            );
+            writeScreen(
+                "performance.timing.responseStart - " +
+                    evalCatch("performance.timing.responseStart"),
+            );
+            writeScreen(
+                "performance.timing.responseEnd - " +
+                    evalCatch("performance.timing.responseEnd"),
+            );
+            writeScreen(
+                "typeof window.ondevicelight - " +
+                    evalCatch("typeof window.ondevicelight"),
+            );
+            writeScreen(
+                "typeof document.ontouchstart - " +
+                    evalCatch("typeof document.ontouchstart"),
+            );
+            writeScreen("window - " + evalCatch("window"));
+            writeScreen("navigator - " + evalCatch("navigator"));
+            writeScreen(
+                "navigator.plugins - " + evalCatch("navigator.plugins"),
+            );
+            writeScreen("eval - " + evalCatch("eval"));
+            writeScreen("screen - " + evalCatch("screen"));
+            writeScreen("window.open - " + evalCatch("window.open"));
+            writeScreen(
+                "IntersectionObserver - " + evalCatch("IntersectionObserver"),
+            );
+            writeScreen("window.alert - " + evalCatch("window.alert"));
+            writeScreen(
+                "window.isSecureContext - " +
+                    evalCatch("window.isSecureContext"),
+            );
+            writeScreen(
+                "typeof document.visibilityState - " +
+                    evalCatch("typeof document.visibilityState"),
+            );
+            writeScreen(
+                "HTMLCanvasElement.prototype.toDataURL - " +
+                    evalCatch("HTMLCanvasElement.prototype.toDataURL"),
+            );
+        </script>
+    </body>
+</html>

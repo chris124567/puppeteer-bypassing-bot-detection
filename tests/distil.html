@@ -1,0 +1,739 @@
+<!-- This file contains (almost) all the tests done by Distil Networks bot detection code.  See https://chris124567.github.io/2020-07-22-reverse-engineering-distil-networks-antibot-javascript/. -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Demonstration</title>
+    </head>
+    <body>
+        <ol id="list"></ol>
+        <script>
+            var listElement = document.getElementById("list");
+            function writeScreen(text) {
+                listElement.innerHTML += "<li>" + text + "</li>";
+            }
+
+            writeScreen(navigator.userAgent);
+            writeScreen(navigator.language);
+            writeScreen(screen.width);
+            writeScreen(screen.height);
+            writeScreen(screen.availHeight);
+            writeScreen(screen.availWidth);
+            writeScreen(screen.pixelDepth);
+            writeScreen(window.innerWidth);
+            writeScreen(window.innerHeight);
+            writeScreen(window.outerWidth);
+            writeScreen(window.outerHeight);
+            writeScreen(window.devicePixelRatio);
+            writeScreen(new Date().getTimezoneOffset() / -60);
+            writeScreen(!!window.indexedDB);
+            writeScreen(!!document.body.addBehavior);
+            writeScreen(!!window.openDatabase);
+            writeScreen(navigator.cpuClass ? navigator.cpuClass : "unknown");
+            writeScreen(navigator.platform ? navigator.platform : "unknown");
+            writeScreen(
+                navigator.doNotTrack ? navigator.doNotTrack : "unknown",
+            );
+            writeScreen(
+                (function getPlugins() {
+                    var pluginList = [];
+                    for (var i = 0; i < navigator.plugins.length; ++i) {
+                        var plugin = navigator.plugins[i];
+                        pluginList.push(
+                            plugin.description +
+                                "~" +
+                                plugin.filename +
+                                "~" +
+                                plugin.name,
+                        );
+                    }
+                    return pluginList.join("|");
+                })(),
+            );
+            writeScreen(
+                (function getMimeTypes() {
+                    var typeList = [];
+                    for (var i = 0; i < navigator.mimeTypes.length; ++i) {
+                        var type = navigator.mimeTypes[i];
+                        typeList.push(
+                            type.type +
+                                "~" +
+                                type.suffixes +
+                                "~" +
+                                type.description,
+                        );
+                    }
+                    return typeList.join("|");
+                })(),
+            );
+            writeScreen(
+                (function getCanvasFp(options) {
+                    var result = [];
+                    // Very simple now, need to make it more complex (geo shapes etc)
+                    var canvas = document.createElement("canvas");
+                    canvas.width = 2000;
+                    canvas.height = 200;
+                    canvas.style.display = "inline";
+                    var ctx = canvas.getContext("2d");
+                    // detect browser support of canvas winding
+                    // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
+                    // https://github.com/Modernizr/Modernizr/blob/master/feature-detects/canvas/winding.js
+                    ctx.rect(0, 0, 10, 10);
+                    ctx.rect(2, 2, 6, 6);
+                    result.push(
+                        "canvas winding:" +
+                            (ctx.isPointInPath(5, 5, "evenodd") === false
+                                ? "yes"
+                                : "no"),
+                    );
+
+                    ctx.textBaseline = "alphabetic";
+                    ctx.fillStyle = "#f60";
+                    ctx.fillRect(125, 1, 62, 20);
+                    ctx.fillStyle = "#069";
+                    // https://github.com/Valve/fingerprintjs2/issues/66
+                    ctx.font = "11pt Arial";
+                    ctx.fillText(
+                        "Cwm fjordbank glyphs vext quiz, \ud83d\ude03",
+                        2,
+                        15,
+                    );
+                    ctx.fillStyle = "rgba(102, 204, 0, 0.2)";
+                    ctx.font = "18pt Arial";
+                    ctx.fillText(
+                        "Cwm fjordbank glyphs vext quiz, \ud83d\ude03",
+                        4,
+                        45,
+                    );
+
+                    // canvas blending
+                    // http://blogs.adobe.com/webplatform/2013/01/28/blending-features-in-canvas/
+                    // http://jsfiddle.net/NDYV8/16/
+                    ctx.globalCompositeOperation = "multiply";
+                    ctx.fillStyle = "rgb(255,0,255)";
+                    ctx.beginPath();
+                    ctx.arc(50, 50, 50, 0, Math.PI * 2, true);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = "rgb(0,255,255)";
+                    ctx.beginPath();
+                    ctx.arc(100, 50, 50, 0, Math.PI * 2, true);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = "rgb(255,255,0)";
+                    ctx.beginPath();
+                    ctx.arc(75, 100, 50, 0, Math.PI * 2, true);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = "rgb(255,0,255)";
+                    // canvas winding
+                    // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
+                    // http://jsfiddle.net/NDYV8/19/
+                    ctx.arc(75, 75, 75, 0, Math.PI * 2, true);
+                    ctx.arc(75, 75, 25, 0, Math.PI * 2, true);
+                    ctx.fill("evenodd");
+
+                    if (canvas.toDataURL) {
+                        result.push("canvas fp:" + canvas.toDataURL());
+                    }
+                    return result;
+                })(),
+            );
+            writeScreen(
+                (function getFontList() {
+                    var baseFonts = ["monospace", "serif", "sans-serif"];
+                    var documentBody = document["body"] || document["head"];
+                    var fontDimensions;
+                    var newSpan = document["createElement"]("span");
+                    var installedFonts = [];
+                    var fontInfo = {};
+                    var i, j;
+                    // commented out some fonts due to inconsistencies across browsers (even though a font is installed a browser might not show it for some reason - explored Boda et al 2011, they have method to find universally supported list of fonts)
+                    var fontList = [
+                        "Andale Mono",
+                        "Arial Black",
+                        "Arial Hebrew",
+                        "Arial MT",
+                        // "Arial Narrow",
+                        "Arial Rounded MT Bold",
+                        "Arial Unicode MS",
+                        "Arial",
+                        "Bitstream Vera Sans Mono",
+                        "Book Antiqua",
+                        "Bookman Old Style",
+                        "Calibri",
+                        "Cambria Math",
+                        "Cambria",
+                        "Century Gothic",
+                        "Century Schoolbook",
+                        "Century",
+                        "Comic Sans MS",
+                        "Comic Sans",
+                        "Consolas",
+                        "Courier New",
+                        "Courier",
+                        "Garamond",
+                        "Geneva",
+                        "Georgia",
+                        "Helvetica Neue",
+                        "Helvetica",
+                        "Impact",
+                        "Lucida Bright",
+                        "Lucida Calligraphy",
+                        "Lucida Console",
+                        "Lucida Fax",
+                        "LUCIDA GRANDE",
+                        "Lucida Handwriting",
+                        "Lucida Sans Typewriter",
+                        "Lucida Sans Unicode",
+                        "Lucida Sans",
+                        "Microsoft Sans Serif",
+                        "Monaco",
+                        "Monotype Corsiva",
+                        "MS Gothic",
+                        "MS Outlook",
+                        "MS PGothic",
+                        "MS Reference Sans Serif",
+                        "MS Sans Serif",
+                        "MS Serif",
+                        "MYRIAD PRO",
+                        "MYRIAD",
+                        "Palatino Linotype",
+                        "Palatino",
+                        "Segoe Print",
+                        "Segoe Script",
+                        "Segoe UI Light",
+                        "Segoe UI Semibold",
+                        "Segoe UI Symbol",
+                        "Segoe UI",
+                        "Tahoma",
+                        "Times New Roman PS",
+                        "Times New Roman",
+                        // "Times",
+                        "Trebuchet MS",
+                        "Verdana",
+                        "Wingdings 2",
+                        "Wingdings 3",
+                        "Wingdings",
+                    ];
+
+                    for (var i = 0; i < baseFonts.length; i++) {
+                        newSpan.style.position = "absolute";
+                        newSpan.style.lineHeight = "normal";
+                        newSpan.style.left = "-999em";
+                        newSpan.style.fontSize = "100px";
+                        newSpan.innerHTML =
+                            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+                        documentBody["appendChild"](newSpan);
+                        newSpan.style.fontFamily = baseFonts[i];
+                        fontDimensions =
+                            newSpan.offsetWidth + "" + newSpan.offsetHeight;
+                        fontInfo[baseFonts[i]] = fontDimensions;
+                    }
+
+                    for (i = 0; i < fontList.length; i++) {
+                        for (j = 0; j < baseFonts.length; j++) {
+                            newSpan.style.fontFamily =
+                                '"' + fontList[i] + '",' + baseFonts[j];
+                            fontDimensions =
+                                newSpan.offsetWidth + "" + newSpan.offsetHeight;
+
+                            if (fontInfo[baseFonts[j]] !== fontDimensions) {
+                                installedFonts.push(fontList[i]);
+                                break;
+                            }
+                        }
+                    }
+                    documentBody["removeChild"](newSpan);
+
+                    return installedFonts.sort();
+                })(),
+            );
+            writeScreen(
+                (function getVideo() {
+                    var e = document.createElement("video"),
+                        t = false;
+                    try {
+                        (t = !!e.canPlayType) &&
+                            ((t = new Boolean(t)),
+                            (t.ogg = e.canPlayType(
+                                'video/ogg; codecs="theora"',
+                            )),
+                            (t.h264 = e.canPlayType(
+                                'video/mp4; codecs="avc1.42E01E"',
+                            )),
+                            (t.webm = e.canPlayType(
+                                'video/webm; codecs="vp8, vorbis"',
+                            )));
+                    } catch (r) {
+                        return "errored";
+                    }
+                    return t
+                        ? JSON.stringify(
+                              {
+                                  ogg: t.ogg,
+                                  h264: t.h264,
+                                  webm: t.webm,
+                              },
+                              null,
+                              4,
+                          )
+                        : false;
+                })(),
+            );
+            writeScreen(
+                (function () {
+                    var e = document.createElement("audio"),
+                        t = false;
+                    return (
+                        (t = !!e.canPlayType) &&
+                            ((t = new Boolean(t)),
+                            (t.ogg =
+                                e.canPlayType('audio/ogg; codecs="vorbis"') ||
+                                "nope"),
+                            (t.mp3 = e.canPlayType("audio/mpeg;") || "nope"),
+                            (t.wav =
+                                e.canPlayType('audio/wav; codecs="1"') ||
+                                "nope"),
+                            (t.m4a =
+                                e.canPlayType("audio/x-m4a;") ||
+                                e.canPlayType("audio/aac;") ||
+                                "nope")),
+                        t
+                            ? JSON.stringify(
+                                  {
+                                      ogg: t.ogg,
+                                      mp3: t.mp3,
+                                      wav: t.wav,
+                                      m4a: t.m4a,
+                                  },
+                                  null,
+                                  4,
+                              )
+                            : false
+                    );
+                })(),
+            );
+            writeScreen(
+                (function getWebgl() {
+                    var dict = {};
+                    var canvas = document.createElement("canvas");
+                    var e = canvas.getContext("webgl");
+                    if (!e) return "unsupported";
+                    var t = function (t) {
+                            return (
+                                e.clearColor(0, 0, 0, 1),
+                                e.enable(e.DEPTH_TEST),
+                                e.depthFunc(e.LEQUAL),
+                                e.clear(
+                                    e.COLOR_BUFFER_BIT | e.DEPTH_BUFFER_BIT,
+                                ),
+                                "[" + t[0] + ", " + t[1] + "]"
+                            );
+                        },
+                        r = function (e) {
+                            var t,
+                                r =
+                                    e.getExtension(
+                                        "EXT_texture_filter_anisotropic",
+                                    ) ||
+                                    e.getExtension(
+                                        "WEBKIT_EXT_texture_filter_anisotropic",
+                                    ) ||
+                                    e.getExtension(
+                                        "MOZ_EXT_texture_filter_anisotropic",
+                                    );
+                            return r
+                                ? ((t = e.getParameter(
+                                      r.MAX_TEXTURE_MAX_ANISOTROPY_EXT,
+                                  )),
+                                  0 === t && (t = 2),
+                                  t)
+                                : null;
+                        },
+                        i = {},
+                        a =
+                            "attribute vec2 attrVertex;varying vec2 varyinTexCoordinate;uniform vec2 uniformOffset;void main(){varyinTexCoordinate=attrVertex+uniformOffset;gl_Position=vec4(attrVertex,0,1);}",
+                        o =
+                            "precision mediump float;varying vec2 varyinTexCoordinate;void main() {gl_FragColor=vec4(varyinTexCoordinate,0,1);}",
+                        s = e.createBuffer();
+                    e.bindBuffer(e.ARRAY_BUFFER, s);
+                    var c = new Float32Array([
+                        -0.2,
+                        -0.9,
+                        0,
+                        0.4,
+                        -0.26,
+                        0,
+                        0,
+                        0.732134444,
+                        0,
+                    ]);
+                    e.bufferData(e.ARRAY_BUFFER, c, e.STATIC_DRAW),
+                        (s.itemSize = 3),
+                        (s.numItems = 3);
+                    var d = e.createProgram(),
+                        u = e.createShader(e.VERTEX_SHADER);
+                    e.shaderSource(u, a), e.compileShader(u);
+                    var h = e.createShader(e.FRAGMENT_SHADER);
+                    e.shaderSource(h, o),
+                        e.compileShader(h),
+                        e.attachShader(d, u),
+                        e.attachShader(d, h),
+                        e.linkProgram(d),
+                        e.useProgram(d),
+                        (d.vertexPosAttrib = e.getAttribLocation(
+                            d,
+                            "attrVertex",
+                        )),
+                        (d.offsetUniform = e.getUniformLocation(
+                            d,
+                            "uniformOffset",
+                        )),
+                        e.enableVertexAttribArray(d.vertexPosArray),
+                        e.vertexAttribPointer(
+                            d.vertexPosAttrib,
+                            s.itemSize,
+                            e.FLOAT,
+                            false,
+                            0,
+                            0,
+                        ),
+                        e.uniform2f(d.offsetUniform, 1, 1),
+                        e.drawArrays(e.TRIANGLE_STRIP, 0, s.numItems),
+                        null != e.canvas && (i.img = e.canvas.toDataURL()),
+                        (i.extensions = e.getSupportedExtensions().join(";")),
+                        (i["aliased line width range"] = t(
+                            e.getParameter(e.ALIASED_LINE_WIDTH_RANGE),
+                        )),
+                        (i["aliased point size range"] = t(
+                            e.getParameter(e.ALIASED_POINT_SIZE_RANGE),
+                        )),
+                        (i["alpha bits"] = e.getParameter(e.ALPHA_BITS)),
+                        (i.antialiasing = e.getContextAttributes().antialias
+                            ? "yes"
+                            : "no"),
+                        (i["blue bits"] = e.getParameter(e.BLUE_BITS)),
+                        (i["depth bits"] = e.getParameter(e.DEPTH_BITS)),
+                        (i["green bits"] = e.getParameter(e.GREEN_BITS)),
+                        (i["max anisotropy"] = r(e)),
+                        (i["max combined texture image units"] = e.getParameter(
+                            e.MAX_COMBINED_TEXTURE_IMAGE_UNITS,
+                        )),
+                        (i["max cube map texture size"] = e.getParameter(
+                            e.MAX_CUBE_MAP_TEXTURE_SIZE,
+                        )),
+                        (i["max fragment uniform vectors"] = e.getParameter(
+                            e.MAX_FRAGMENT_UNIFORM_VECTORS,
+                        )),
+                        (i["max render buffer size"] = e.getParameter(
+                            e.MAX_RENDERBUFFER_SIZE,
+                        )),
+                        (i["max texture image units"] = e.getParameter(
+                            e.MAX_TEXTURE_IMAGE_UNITS,
+                        )),
+                        (i["max texture size"] = e.getParameter(
+                            e.MAX_TEXTURE_SIZE,
+                        )),
+                        (i["max varying vectors"] = e.getParameter(
+                            e.MAX_VARYING_VECTORS,
+                        )),
+                        (i["max vertex attribs"] = e.getParameter(
+                            e.MAX_VERTEX_ATTRIBS,
+                        )),
+                        (i["max vertex texture image units"] = e.getParameter(
+                            e.MAX_VERTEX_TEXTURE_IMAGE_UNITS,
+                        )),
+                        (i["max vertex uniform vectors"] = e.getParameter(
+                            e.MAX_VERTEX_UNIFORM_VECTORS,
+                        )),
+                        (i["max viewport dims"] = t(
+                            e.getParameter(e.MAX_VIEWPORT_DIMS),
+                        )),
+                        (i["red bits"] = e.getParameter(e.RED_BITS)),
+                        (i.renderer = e.getParameter(e.RENDERER)),
+                        (i["shading language version"] = e.getParameter(
+                            e.SHADING_LANGUAGE_VERSION,
+                        )),
+                        (i["stencil bits"] = e.getParameter(e.STENCIL_BITS)),
+                        (i.vendor = e.getParameter(e.VENDOR)),
+                        (i.version = e.getParameter(e.VERSION)),
+                        e.getShaderPrecisionFormat &&
+                            ((i[
+                                "vertex shader high float precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.HIGH_FLOAT,
+                            ).precision),
+                            (i[
+                                "vertex shader high float precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.HIGH_FLOAT,
+                            ).rangeMin),
+                            (i[
+                                "vertex shader high float precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.HIGH_FLOAT,
+                            ).rangeMax),
+                            (i[
+                                "vertex shader medium float precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.MEDIUM_FLOAT,
+                            ).precision),
+                            (i[
+                                "vertex shader medium float precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.MEDIUM_FLOAT,
+                            ).rangeMin),
+                            (i[
+                                "vertex shader medium float precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.MEDIUM_FLOAT,
+                            ).rangeMax),
+                            (i[
+                                "vertex shader low float precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.LOW_FLOAT,
+                            ).precision),
+                            (i[
+                                "vertex shader low float precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.LOW_FLOAT,
+                            ).rangeMin),
+                            (i[
+                                "vertex shader low float precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.LOW_FLOAT,
+                            ).rangeMax),
+                            (i[
+                                "fragment shader high float precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.HIGH_FLOAT,
+                            ).precision),
+                            (i[
+                                "fragment shader high float precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.HIGH_FLOAT,
+                            ).rangeMin),
+                            (i[
+                                "fragment shader high float precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.HIGH_FLOAT,
+                            ).rangeMax),
+                            (i[
+                                "fragment shader medium float precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.MEDIUM_FLOAT,
+                            ).precision),
+                            (i[
+                                "fragment shader medium float precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.MEDIUM_FLOAT,
+                            ).rangeMin),
+                            (i[
+                                "fragment shader medium float precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.MEDIUM_FLOAT,
+                            ).rangeMax),
+                            (i[
+                                "fragment shader low float precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.LOW_FLOAT,
+                            ).precision),
+                            (i[
+                                "fragment shader low float precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.LOW_FLOAT,
+                            ).rangeMin),
+                            (i[
+                                "fragment shader low float precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.LOW_FLOAT,
+                            ).rangeMax),
+                            (i[
+                                "vertex shader high int precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.HIGH_INT,
+                            ).precision),
+                            (i[
+                                "vertex shader high int precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.HIGH_INT,
+                            ).rangeMin),
+                            (i[
+                                "vertex shader high int precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.HIGH_INT,
+                            ).rangeMax),
+                            (i[
+                                "vertex shader medium int precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.MEDIUM_INT,
+                            ).precision),
+                            (i[
+                                "vertex shader medium int precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.MEDIUM_INT,
+                            ).rangeMin),
+                            (i[
+                                "vertex shader medium int precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.MEDIUM_INT,
+                            ).rangeMax),
+                            (i[
+                                "vertex shader low int precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.LOW_INT,
+                            ).precision),
+                            (i[
+                                "vertex shader low int precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.LOW_INT,
+                            ).rangeMin),
+                            (i[
+                                "vertex shader low int precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.VERTEX_SHADER,
+                                e.LOW_INT,
+                            ).rangeMax),
+                            (i[
+                                "fragment shader high int precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.HIGH_INT,
+                            ).precision),
+                            (i[
+                                "fragment shader high int precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.HIGH_INT,
+                            ).rangeMin),
+                            (i[
+                                "fragment shader high int precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.HIGH_INT,
+                            ).rangeMax),
+                            (i[
+                                "fragment shader medium int precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.MEDIUM_INT,
+                            ).precision),
+                            (i[
+                                "fragment shader medium int precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.MEDIUM_INT,
+                            ).rangeMin),
+                            (i[
+                                "fragment shader medium int precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.MEDIUM_INT,
+                            ).rangeMax),
+                            (i[
+                                "fragment shader low int precision"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.LOW_INT,
+                            ).precision),
+                            (i[
+                                "fragment shader low int precision rangeMin"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.LOW_INT,
+                            ).rangeMin),
+                            (i[
+                                "fragment shader low int precision rangeMax"
+                            ] = e.getShaderPrecisionFormat(
+                                e.FRAGMENT_SHADER,
+                                e.LOW_INT,
+                            ).rangeMax));
+                    var g = e.getExtension("WEBGL_debug_renderer_info");
+                    i["unmasked vendor"] = e.getParameter(
+                        g.UNMASKED_VENDOR_WEBGL,
+                    );
+                    i["unmasked renderer"] = e.getParameter(
+                        g.UNMASKED_RENDERER_WEBGL,
+                    );
+                    return JSON.stringify(i, null, 4);
+                })(),
+            );
+            writeScreen(
+                "undefined" != typeof navigator.maxTouchPoints
+                    ? (e = navigator.maxTouchPoints)
+                    : "undefined" != typeof navigator.msMaxTouchPoints,
+            );
+            writeScreen(navigator.vendor);
+            writeScreen(navigator.product);
+            writeScreen(navigator.productSub);
+            writeScreen(
+                "Microsoft Internet Explorer" === navigator.appName
+                    ? true
+                    : !(
+                          "Netscape" !== navigator.appName ||
+                          !/Trident/.test(navigator.userAgent)
+                      ),
+            );
+            writeScreen("undefined" != typeof window.chrome);
+            writeScreen(!!navigator.webdriver);
+            writeScreen(window.history.length);
+            writeScreen(navigator.hardwareConcurrency);
+            writeScreen(
+                (function getDevices() {
+                    var deviceLabels = [];
+
+                    if (
+                        !navigator["mediaDevices"] ||
+                        !navigator["mediaDevices"]["enumerateDevices"]
+                    ) {
+                        return deviceLabels;
+                    }
+
+                    navigator["mediaDevices"]
+                        ["enumerateDevices"]()
+                        .then(function (devices) {
+                            devices.forEach(function (device) {
+                                /* IDs are not stable so we just get labels. */
+                                deviceLabels.push({
+                                    label: device.label,
+                                    id: device.deviceId,
+                                    kind: device.kind,
+                                });
+                                // console.log(deviceLabels);
+                            });
+                        })
+                        .catch(function () {});
+
+                    return deviceLabels;
+                })(),
+            );
+            writeScreen();
+        </script>
+    </body>
+</html>
