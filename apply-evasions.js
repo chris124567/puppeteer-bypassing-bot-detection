@@ -595,7 +595,7 @@ module.exports = async function (page) {
                     RUNNING: "running",
                 },
                 get isInstalled() {
-                    false;
+                    return false;
                 },
                 getDetails: function getDetails() {
                     if (arguments.length) {
