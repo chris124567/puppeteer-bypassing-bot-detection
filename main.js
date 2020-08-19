@@ -11,10 +11,12 @@ const applyEvasions = require("./apply-evasions");
             "--disable-infobars",
             "--window-position=0,0",
             "--lang=en-US,en;q=0.9", // send accept-language header
-            "--proxy-server=170.78.75.55:22222", // hola argentina proxy (tried to pick sketchy region to raise "suspiciousness" score)
+            "--proxy-server=154.13.49.12:22222", // hola us cogent server
         ],
-        headless: false,
+        // headless: false,
+        headless: true,
         ignoreHTTPSErrors: true,
+        dumpio: true, // log console events
     });
 
     const page = await browser.newPage();
@@ -27,14 +29,23 @@ const applyEvasions = require("./apply-evasions");
 
     await applyEvasions(page);
 
-    /* PERIMETERX SITES (Was able to navigate sites, I don't have an account on any of them so I couldn't test purchasing things) */
-    // await page.goto("https://www.footlocker.com/");
-    // await page.goto("https://www.kiva.org/");
-    // await page.goto("https://stockx.com/sneakers");
+    /* PERIMETERX SITES */
+    // await page.goto("https://www.usa-people-search.com/names/a_400_599_1", {
+    //     waitUntil: "networkidle0",
+    // });
 
     /* DISTIL SITES (PASSED) */
-    // await page.goto("https://www.lufthansa.com");
-    await page.goto("https://streeteasy.com");
+    await page.goto("https://lufthansa.com", {
+        waitUntil: "networkidle0",
+    });
+    // await page.goto("https://streeteasy.com", {
+    //     waitUntil: "networkidle0",
+    // });
+
+    /* RECAPTCHA SCORE PAGE */
+    // await page.goto(
+    // "https://recaptcha-demo.appspot.com/recaptcha-v3-request-scores.php",
+    // );
 
     /*
     LOCAL TESTING SITES (see tests folder)
@@ -48,5 +59,11 @@ const applyEvasions = require("./apply-evasions");
     // await page.goto("https://infosimples.github.io/detect-headless/");
     // await page.goto("https://arh.antoinevastel.com/bots/areyouheadless");
 
-    // await browser.close();
+    // if true we passed distil check
+    console.log(
+        (await page.title()) ===
+            "Book a flight now and discover the world | Lufthansa",
+    );
+
+    await browser.close();
 })();

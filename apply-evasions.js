@@ -378,10 +378,104 @@ module.exports = async function (page) {
     });
 
     // Overwrite iframe window object so we don't have to reapply the above evasions for every iframe
+    // Stolen from https://github.com/berstend/puppeteer-extra/blob/ceca9c6fed0a9f39d6c80b71fd413f3656ebb704/packages/puppeteer-extra-plugin-stealth/evasions/iframe.contentWindow/index.js
     await page.evaluateOnNewDocument(() => {
-        Object.defineProperty(HTMLIFrameElement.prototype, "contentWindow", {
-            get: () => window,
-        });
+        try {
+            // Adds a contentWindow proxy to the provided iframe element
+            const addContentWindowProxy = (iframe) => {
+                const contentWindowProxy = {
+                    get(target, key) {
+                        // Now to the interesting part:
+                        // We actually make this thing behave like a regular iframe window,
+                        // by intercepting calls to e.g. `.self` and redirect it to the correct thing. :)
+                        // That makes it possible for these assertions to be correct:
+                        // iframe.contentWindow.self === window.top // must be false
+                        if (key === "self") {
+                            return this;
+                        }
+                        // iframe.contentWindow.frameElement === iframe // must be true
+                        if (key === "frameElement") {
+                            return iframe;
+                        }
+                        return Reflect.get(target, key);
+                    },
+                };
+
+                if (!iframe.contentWindow) {
+                    const proxy = new Proxy(window, contentWindowProxy);
+                    Object.defineProperty(iframe, "contentWindow", {
+                        get() {
+                            return proxy;
+                        },
+                        set(newValue) {
+                            return newValue; // contentWindow is immutable
+                        },
+                        enumerable: true,
+                        configurable: false,
+                    });
+                }
+            };
+
+            // Handles iframe element creation, augments `srcdoc` property so we can intercept further
+            const handleIframeCreation = (target, thisArg, args) => {
+                const iframe = target.apply(thisArg, args);
+
+                // We need to keep the originals around
+                const _iframe = iframe;
+                const _srcdoc = _iframe.srcdoc;
+
+                // Add hook for the srcdoc property
+                // We need to be very surgical here to not break other iframes by accident
+                Object.defineProperty(iframe, "srcdoc", {
+                    configurable: true, // Important, so we can reset this later
+                    get: function () {
+                        return _iframe.srcdoc;
+                    },
+                    set: function (newValue) {
+                        addContentWindowProxy(this);
+                        // Reset property, the hook is only needed once
+                        Object.defineProperty(iframe, "srcdoc", {
+                            configurable: false,
+                            writable: false,
+                            value: _srcdoc,
+                        });
+                        _iframe.srcdoc = newValue;
+                    },
+                });
+                return iframe;
+            };
+
+            // Adds a hook to intercept iframe creation events
+            const addIframeCreationSniffer = () => {
+                /* global document */
+                const createElement = {
+                    // Make toString() native
+                    get(target, key) {
+                        return Reflect.get(target, key);
+                    },
+                    apply: function (target, thisArg, args) {
+                        const isIframe =
+                            args &&
+                            args.length &&
+                            `${args[0]}`.toLowerCase() === "iframe";
+                        if (!isIframe) {
+                            // Everything as usual
+                            return target.apply(thisArg, args);
+                        } else {
+                            return handleIframeCreation(target, thisArg, args);
+                        }
+                    },
+                };
+                // All this just due to iframes with srcdoc bug
+                document.createElement = new Proxy(
+                    document.createElement,
+                    createElement,
+                );
+            };
+
+            // Let's go
+            addIframeCreationSniffer();
+        } catch (err) {}
     });
 
     // disable alert since it blocks
@@ -414,6 +508,114 @@ module.exports = async function (page) {
                     return imageDescriptor.get.apply(this);
                 },
             });
+        });
+    });
+
+    await page.evaluateOnNewDocument(() => {
+        /* Copied from Google Chrome v83 on Linux */
+        var currentTime = new Date().getTime();
+        var currentTimeDivided = currentTime / 1000;
+        var randOffset = Math.random() * 3;
+
+        Object.defineProperty(window, "chrome", {
+            writable: true,
+            enumerable: true,
+            configurable: false, // note!
+            value: {}, // We'll extend that later
+        });
+
+        Object.defineProperty(window.chrome, "csi", {
+            value: function csi() {
+                /* https://chromium.googlesource.com/chromium/src.git/+/master/chrome/renderer/loadtimes_extension_bindings.cc */
+                return {
+                    startE: currentTime,
+                    onloadT: currentTime + 3 * randOffset,
+                    pageT: 30000 * randOffset,
+                    tran: 15,
+                };
+            },
+        });
+
+        Object.defineProperty(window.chrome, "loadTimes", {
+            value: function loadTimes() {
+                return {
+                    requestTime: currentTimeDivided + 1 * randOffset,
+                    startLoadTime: currentTimeDivided + 1 * randOffset,
+                    commitLoadTme: currentTimeDivided + 2 * randOffset,
+                    finishDocumentLoadTime: currentTimeDivided + 3 * randOffset,
+                    firstPaintTime: currentTimeDivided + 4 * randOffset,
+                    finishLoadTime: currentTimeDivided + 5 * randOffset,
+                    firstPaintAfterLoadTime: 0,
+                    navigationType: "Other",
+                    wasFetchedViaSpdy: true,
+                    wasNpnNegotiated: true,
+                    npnNegotiatedProtocol: "h2",
+                    wasAlternateProtocolAvailable: false,
+                    connectionInfo: "h2",
+                };
+            },
+        });
+
+        const stripErrorWithAnchor = (err, anchor) => {
+            const stackArr = err.stack.split("\n");
+            const anchorIndex = stackArr.findIndex((line) =>
+                line.trim().startsWith(anchor),
+            );
+            if (anchorIndex === -1) {
+                return err; // 404, anchor not found
+            }
+            // Strip everything from the top until we reach the anchor line (remove anchor line as well)
+            // Note: We're keeping the 1st line (zero index) as it's unrelated (e.g. `TypeError`)
+            stackArr.splice(1, anchorIndex);
+            err.stack = stackArr.join("\n");
+            return err;
+        };
+
+        const makeError = {
+            ErrorInInvocation: (fn) => {
+                const err = new TypeError(`Error in invocation of app.${fn}()`);
+                return stripErrorWithAnchor(
+                    err,
+                    `at ${fn} (eval at <anonymous>`,
+                );
+            },
+        };
+
+        // https://github.com/berstend/puppeteer-extra/blob/9c3d4aace43cb44da984f1e2f581ad376ebefeea/packages/puppeteer-extra-plugin-stealth/evasions/chrome.app/index.js
+        Object.defineProperty(window.chrome, "app", {
+            value: {
+                InstallState: {
+                    DISABLED: "disabled",
+                    INSTALLED: "installed",
+                    NOT_INSTALLED: "not_installed",
+                },
+                RunningState: {
+                    CANNOT_RUN: "cannot_run",
+                    READY_TO_RUN: "ready_to_run",
+                    RUNNING: "running",
+                },
+                get isInstalled() {
+                    false;
+                },
+                getDetails: function getDetails() {
+                    if (arguments.length) {
+                        throw makeError.ErrorInInvocation(`getDetails`);
+                    }
+                    return null;
+                },
+                getIsInstalled: function getIsInstalled() {
+                    if (arguments.length) {
+                        throw makeError.ErrorInInvocation(`getIsInstalled`);
+                    }
+                    return false;
+                },
+                runningState: function runningState() {
+                    if (arguments.length) {
+                        throw makeError.ErrorInInvocation(`runningState`);
+                    }
+                    return "cannot_run";
+                },
+            },
         });
     });
 
@@ -472,6 +674,14 @@ module.exports = async function (page) {
                 "height",
             ).get,
             HTMLElement.prototype.animate,
+            window.chrome.csi,
+            window.chrome.loadTimes,
+            window.chrome.app.getDetails,
+            window.chrome.app.getIsInstalled,
+            window.chrome.app.runningState,
+            Object.getOwnPropertyDescriptor(window.chrome.app, "isInstalled")
+                .get,
+            document.createElement,
         ];
 
         // Undetecable toString modification - https://adtechmadness.wordpress.com/2019/03/23/javascript-tampering-detection-and-stealth/ */
