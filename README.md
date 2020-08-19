@@ -29,3 +29,13 @@ Patched attributes
 * Make window.alert a stub
 * HTMLImageElement.prototype.width / HTMLImageElement.prototype.height for broken images
 * Undetectable toString patched with Proxy
+* window.chrome
+	* csi
+	* loadTimes
+	* app
+		* isInstalled
+		* getDetails
+		* getIsInstalled
+		* runningState
+		* InstallState
+		* RunningState
