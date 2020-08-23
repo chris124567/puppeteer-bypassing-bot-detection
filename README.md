@@ -1,5 +1,7 @@
 ## puppeteer-bypassing-bot-detection
 
+This repository is incomplete and not actively maintained.  It was primarily a test to see the minimum amount needed to bypass Distil networks and other public headless checks.  Use https://github.com/berstend/puppeteer-extra/tree/master/packages/puppeteer-extra-plugin-stealth/.
+
 This repository contains code for bypassing common bot detection checks by a few vendors ([Distil Networks](https://www.whitepages.com/dstl-wp.js), [Adscore](http://c.adsco.re/d), and [Google IMA](https://imasdk.googleapis.com/js/sdkloader/ima3.js)).
 
 Patched attributes
